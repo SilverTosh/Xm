@@ -1,0 +1,30 @@
+const {
+  default: makeWASocket,
+  useMultiFileAuthState,
+  generateRegistrationOptions,
+  initAuthCreds,
+  getRegistrationCode
+} = require("@whiskeysockets/baileys");
+
+const readline = require('readline');
+
+async function startWithPairingCode() {
+  const phoneNumber = '254720326316';  // Enter the phone number for pairing
+
+  const { state, saveCreds } = await useMultiFileAuthState(`./sessions/${phoneNumber}`);
+
+  const sock = makeWASocket({
+    auth: state,
+    printQRInTerminal: false
+  });
+
+  const registration = await generateRegistrationOptions(phoneNumber, { method: 'pairing-code' });
+  console.log('\nGo to WhatsApp > Linked Devices > Link a Device\n');
+  console.log(`Pairing Code for ${phoneNumber}: ${registration.pairingCode}\n`);
+
+  const creds = initAuthCreds();
+  await getRegistrationCode(creds, registration);
+  saveCreds();
+}
+
+startWithPairingCode();
